@@ -1,8 +1,8 @@
 var gameSquares = {
 	"a": null,
-	"b": null,
+	"b": "o",
 	"c": null,
-	"d": null,
+	"d": "o",
 	"e": null,
 	"f": null,
 	"g": null,
@@ -31,117 +31,14 @@ function NoughtsAndCrosses() {
 function initialiseBoard() {
 	for(var square in gameSquares) {
 		if(gameSquares.hasOwnProperty(square)) {
-			document.getElementById(square).addEventListener("click", function(){
+			if(gameSquares[square] == "o") {
 				document.getElementById(square).innerHTML = "o";
-			});
-		}
-	}
-}
-
-function isOpponentWinner(){
-	//return (checkTheBoard("o", 3, "x", 0).length > 0) ? true : false;
-	var wonMoves = checkTheBoard("o", 3, "x", 0);
-
-	if(wonMoves.length > 0) {
-		return true;
-	}
-	else {
-		return false;
-	}
-
-}
-
-function canIWinThisTurn(){
-	var winningMoves = checkTheBoard("x", 2, "o", 0);
-
-	if(winningMoves.length > 0) {
-		fillInSquare(whichRow(winningMoves));
-		return true;
-	}
-	else {
-		return false;
-	}
-
-}
-
-function canOpponentWinNextTurn(){
-	var rowsThatNeedBlocking = checkTheBoard("o", 2, "x", 0);
-
-	if(rowsThatNeedBlocking.length > 0) {
-		fillInSquare(whichRow(rowsThatNeedBlocking));
-		return true;
-	}
-	else {
-		return false;
-	}
-
-}
-
-function canIWinNextTurn(){
-	var possibleRows = checkTheBoard("x", 1, "o", 0);
-	if(possibleRows.length > 0) {
-		var possibleSquares = [];
-		for(var i = 0; i < possibleRows.length; i++) {
-			possibleSquares = possibleSquares.concat(possibleRows[i]);
-		}
-		var winningMoves = [];
-		for(var i = 0; i < possibleSquares.length; i++) {
-			for(var j = i + 1; j < possibleSquares.length; j++) {
-				if((possibleSquares[j] == possibleSquares[i]) && (gameSquares[possibleSquares[i]] == null)) {
-					winningMoves.push(possibleSquares[i]);
-					break;
-				}
+			}
+			if(gameSquares[square] == "x") {
+				document.getElementById(square).innerHTML = "x";
 			}
 		}
-
-		if(winningMoves.length > 0) {
-			fillInSquare(whichRow(winningMoves));
-			return true;
-		}
-		else {
-			return false;
-		}
-
 	}
-	else {
-		return false;
-	}
-}
-
-function canOpponentWinNextNextTurn(){
-	var possibleRows = checkTheBoard("o", 1, "x", 0);
-	if(possibleRows.length > 0) {
-		var possibleSquares = [];
-		for(var i = 0; i < possibleRows.length; i++) {
-			possibleSquares = possibleSquares.concat(possibleRows[i]);
-		}
-		var winningMoves = [];
-		for(var i = 0; i < possibleSquares.length; i++) {
-			for(var j = i + 1; j < possibleSquares.length; j++) {
-				if((possibleSquares[j] == possibleSquares[i]) && (gameSquares[possibleSquares[i]] == null)) {
-					winningMoves.push(possibleSquares[i]);
-					break;
-				}
-			}
-		}
-		
-		if(winningMoves.length > 0) {
-			fillInSquare(whichRow(winningMoves));
-			return true;
-		}
-		else {
-			return false;
-		}
-
-	}
-	else {
-		return false;
-	}
-}
-
-function checkMoves(moves){
-	console.log("moves is " + moves);
-	return (moves.length > 0) ? true : false;
 }
 
 function checkTheBoard(playerType, numberInPlayerLine, opponentType, numberInOpponentLine){
@@ -164,38 +61,127 @@ function checkTheBoard(playerType, numberInPlayerLine, opponentType, numberInOpp
 	return arrayOfLines;
 }
 
-function endGame(){
-	console.log("There is a winner!");
+function isOpponentWinner(){
+	// look for any lines with 3 o's
+	var possibleRows = checkTheBoard("o", 3, "x", 0);
+	// if there is more than zero, o has won the game
+	console.log(possibleRows);
+	if(possibleRows.length > 0) {
+		return true;
+	}
+	else {
+		return false;
+	}
 }
 
-function randomRowPicker(min,max) {
-	return Math.floor(Math.random()*(max-min+1)+min);
+function canIWinThisTurn(){
+	// look for any lines with 2 x's and no o's
+	var possibleRows = checkTheBoard("x", 2, "o", 0);
+	// if there are, x can win the game this turn
+	if(possibleRows.length > 0) {
+		fillInSquare(possibleRows);
+		return true;
+	}
+	else {
+		return false;
+	}
 }
 
-function whichRow(arrayOfSquares) {
-	// should check against squaresInOrderOfPriority
-	var squareToFill = null;
-	for(var i = 0; i < squaresInOrderOfPriority.length; i++) {
-		for(var j = 0; j < arrayOfSquares.length; j++) {
-			if(squaresInOrderOfPriority[i] == arrayOfSquares[j]) {
-				squareToFill = arrayOfSquares[j];
-				break;
+function canOpponentWinNextTurn(){
+	// look for any lines with 2 o's and no x's
+	var possibleRows = checkTheBoard("o", 2, "x", 0);
+	// if there are, o can win the game next turn, and needs to be blocked
+	if(possibleRows.length > 0) {
+		fillInSquare(possibleRows);
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+function canIWinNextTurn(){
+	// look for any lines with 1 x and no o's
+	var possibleRows = checkTheBoard("x", 1, "o", 0);
+	if(possibleRows.length > 0) {
+		var possibleSquares = [];
+		for(var i = 0; i < possibleRows.length; i++) {
+			possibleSquares = possibleSquares.concat(possibleRows[i]);
+		}
+		// now search for 2 interceding lines with one x each in them
+		var winningMoves = [];
+		for(var i = 0; i < possibleSquares.length; i++) {
+			for(var j = i + 1; j < possibleSquares.length; j++) {
+				if((possibleSquares[j] == possibleSquares[i]) && (gameSquares[possibleSquares[i]] == null)) {
+					winningMoves.push(possibleSquares[i]);
+					break;
+				}
 			}
 		}
-		if(squareToFill != null) {
-			break;
+		if(winningMoves.length > 0) {
+			fillInSquare(winningMoves);
+			return true;
 		}
+		else {
+			return false;
+		}
+
 	}
-	return arrayOfSquares[j];
+	else {
+		return false;
+	}
 }
 
-function fillInSquare(row) {
+function canOpponentWinNextNextTurn(){
+	// look for any lines with 1 o and no x's
+	var possibleRows = checkTheBoard("o", 1, "x", 0);
+	console.log("possibleRows");
+	console.log(possibleRows);
+	console.log("possibleRows");
+	if(possibleRows.length > 0) {
+		var possibleSquares = [];
+		for(var i = 0; i < possibleRows.length; i++) {
+			possibleSquares = possibleSquares.concat(possibleRows[i]);
+		}
+		// now search for 2 interceding lines with one o each in them
+		var winningMoves = [];
+		for(var i = 0; i < possibleSquares.length; i++) {
+			for(var j = i + 1; j < possibleSquares.length; j++) {
+				if((possibleSquares[j] == possibleSquares[i]) && (gameSquares[possibleSquares[i]] == null)) {
+					winningMoves.push(possibleSquares[i]);
+					break;
+				}
+			}
+		}
+		if(winningMoves.length > 0) {
+			fillInSquare(winningMoves);
+			return true;
+		}
+		else {
+			return false;
+		}
+
+	}
+	else {
+		return false;
+	}
+}
+
+function checkMoves(moves){
+	console.log("moves is " + moves);
+	return (moves.length > 0) ? true : false;
+}
+
+function fillInSquare(playableRows) {
+	var row = playableRows[0];
 	console.log("Row is " + row);
 	for(var i = 0; i < row.length; i++) {
 		if(gameSquares[row[i]] == null) {
+			console.log(row[i] + " is playable.");
 			fillSquare(row[i]);
 			break;
 		}
+			console.log(row[i] + " is akready used.");
 	}
 }
 
@@ -219,13 +205,12 @@ function makeAMove(){
 function considerMove(){
 	if(isOpponentWinner()) {
 		console.log("The other bloke already won!");
-		endGame();
 	}
 	else if(canIWinThisTurn()) {
-		console.log("You have won!");
+		console.log("You won this turn!");
 	}
 	else if(canOpponentWinNextTurn()) {
-		console.log("You need to block your opponent!");
+		console.log("You have blocked your opponent!");
 	}
 	else if(canIWinNextTurn()) {
 		console.log("You can force the win!");
